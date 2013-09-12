@@ -118,18 +118,47 @@ function Unit(type, x, y)
 		}
 		Unit.prototype.attack = function(x, y)
 		{
-			if (map.tiles[x][y].unit)
-				addMessage(this.type.name + " fires a shot at " + map.tiles[x][y].unit.type.name);
-			else
+			var u = map.tiles[x][y].unit;
+			if (u && u != this)
+			{
+				u.takeDamage(1);
+				addMessage(this.type.name + " fires a shot at " + u.type.name);
+			}else{
 				addMessage(this.type.name + " fires a shot into the air");
+			}
 			addShotVisual(this.x, this.y, x, y);
 			insertIntoActQueue(actQueue, 2);
+		}
+		Unit.prototype.takeDamage = function(amount)
+		{
+			this.hp -= amount;
+			if (this.hp <= 0)
+			{
+				this.hp = 0;
+				this.removeUnit();
+			}
+		}
+		Unit.prototype.removeUnit = function()
+		{
+			map.tiles[this.x][this.y].unit = null;
+			for(var idx = 0; idx < unitList.length; idx++)
+				if (unitList[idx] == this)
+					unitList.splice(idx, 1);
+			if (actQueue == this)
+			{
+				actQueue = actQueue.actNext;
+			}else{
+				var u = actQueue;
+				while(u.actNext != this)
+					u = u.actNext;
+				u.actNext = u.actNext.actNext;
+			}
 		}
 		Unit.prototype.draw = function()
 		{
 			if (map.tiles[this.x][this.y].vis < 2)
 				return;
-			drawHealth(this.x-map.viewX, this.y-map.viewY, this.hp, this.maxHp);
+			if (this.hp < this.maxHp) drawHealth(this.x-map.viewX, this.y-map.viewY, this.hp, this.maxHp);
 			drawSprite(this.x-map.viewX, this.y-map.viewY, this.type.sprite);
 		}
 	}
@@ -161,7 +190,7 @@ function updateActQueue()
 		for(var u=actQueue; u!=null; u=u.actNext)
 			u.actDelay -= delayZero;
 	
-	while(player != actQueue)
+	while(player != actQueue && player.hp > 0)
 	{
 		var delayZero = actQueue.actDelay;
 		if (delayZero > 0)

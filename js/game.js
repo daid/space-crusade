@@ -56,6 +56,13 @@ var gameStateNormal = {
 				prePlayerAction();
 				gameState = gameStateTarget;
 				gameState.target = {x: player.x, y: player.y}
+				castLight(player.x, player.y, 10, function(x, y) {
+					if (map.tiles[x][y].unit && map.tiles[x][y].unit.isEnemy())
+					{
+						gameState.target.x = x;
+						gameState.target.y = y;
+					}
+				});
 			}
 			if (keyCode == 190 || keyCode == 46) { prePlayerAction(); insertIntoActQueue(player, 1); }
 		}
@@ -158,7 +165,7 @@ function drawSprite(x, y, nr)
 function drawHealth(x, y, value, max)
 {
 	drawRect(x*16, 32+y*16-2, 16, 4, "rgba(0, 0, 0, 0.7)");
-	drawRect(x*16+1, 32+y*16-2+1, 14, 2, "rgba(0, 255, 0, 0.5)");
+	drawRect(x*16+1, 32+y*16-2+1, 14*value/max, 2, "rgba(0, 255, 0, 0.5)");
 }
 
 function drawString(x, y, str)
@@ -170,7 +177,7 @@ function drawString(x, y, str)
 			drawImage('font', x, y, (c - 65) * 9, 7, 8, 6);
 		else if (c >= 65+32 && c < 65+32+27)
 			drawImage('font', x, y, (c - 65 - 32) * 9, 7, 8, 6);
-		else if (c >= 49 && c < 48+9)
+		else if (c >= 49 && c < 49+9)
 			drawImage('font', x, y, (c - 49) * 9, 14, 8, 6);
 		else if (c == 48)//0
 			drawImage('font', x, y, 81, 14, 8, 6);
