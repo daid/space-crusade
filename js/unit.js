@@ -203,12 +203,7 @@ function updateActQueue()
 		{
 			friendlyAI(u);
 		}else{
-			//TODO: EnemyAI
-			if (random(0, 100) < 50) {
-				if (random(0, 100) < 50) u.move(u.x - 1, u.y); else u.move(u.x + 1, u.y);
-			}else{
-				if (random(0, 100) < 50) u.move(u.x, u.y - 1); else u.move(u.x, u.y + 1);
-			}
+			enemyAI(u);
 		}
 		
 		if (u == actQueue)//If no action was done, then do nothing for 1 time unit.

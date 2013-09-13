@@ -46,10 +46,10 @@ var gameStateNormal = {
 	{
 		if (actQueue == player)
 		{
-			if (keyCode == 37) { prePlayerAction(); player.move(player.x - 1, player.y); }
-			if (keyCode == 38) { prePlayerAction(); player.move(player.x, player.y - 1); }
-			if (keyCode == 39) { prePlayerAction(); player.move(player.x + 1, player.y); }
-			if (keyCode == 40) { prePlayerAction(); player.move(player.x, player.y + 1); }
+			if (keyCode == 37) { prePlayerAction(); player.move(player.x - 1, player.y); map.viewX = player.x - 10; map.viewY = player.y - 10; }
+			if (keyCode == 38) { prePlayerAction(); player.move(player.x, player.y - 1); map.viewX = player.x - 10; map.viewY = player.y - 10; }
+			if (keyCode == 39) { prePlayerAction(); player.move(player.x + 1, player.y); map.viewX = player.x - 10; map.viewY = player.y - 10; }
+			if (keyCode == 40) { prePlayerAction(); player.move(player.x, player.y + 1); map.viewX = player.x - 10; map.viewY = player.y - 10; }
 			if (keyCode == 70)
 			{
 				addMessage('Select target...');
