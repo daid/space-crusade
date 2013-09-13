@@ -1,12 +1,13 @@
 
 function friendlyAI(unit)
 {
-	if (random(0, 100) < 50) return;
-
 	var enemyList = new Array();
-	castLight(unit.x, unit.y, 20, function(x, y) {
+	castLight(unit.x, unit.y, 10, function(x, y) {
 		if (map.tiles[x][y].unit && map.tiles[x][y].unit.isEnemy())
-			enemyList.push(map.tiles[x][y].unit);
+		{
+			if (traceLine(unit.x, unit.y, x, y, function(x, y) { return map.tiles[x][y].type >= 16; }))
+				enemyList.push(map.tiles[x][y].unit);
+		}
 	});
 	if (enemyList.length > 0)
 	{

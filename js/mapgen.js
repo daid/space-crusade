@@ -9,7 +9,7 @@ function generateMap()
 		{
 			map.tiles[x] = new Array();
 			for(var y=0;y<map.height;y++)
-				map.tiles[x][y] = {groundTile: 16, vis: 0, type: 0, unit: null};
+				map.tiles[x][y] = {groundTile: 16, vis: 0, type: 0, unit: null, blood: false};
 		}
 		
 		//Build random corridors from the center out.

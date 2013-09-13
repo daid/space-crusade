@@ -145,3 +145,37 @@ function castLight_3(x, y, dist, range, fmin, fmax, callback)
 	}
 	castLight_3(x, y, dist+1, range, fmin, fmax, callback);
 }
+
+function traceLine(x0, y0, x1, y1, callback)
+{
+	var dx = Math.abs(x1 - x0);
+	var dy = Math.abs(y1 - y0);
+	if (x0 < x1) var sx = 1; else var sx = -1;
+	if (y0 < y1) var sy = 1; else var sy = -1;
+	
+	var err = dx - dy;
+	while(true)
+	{
+		if (callback && callback(x0, y0))
+			return false;
+		if (x0 == x1 && y0 == y1) return true;
+		
+		var e2 = 2*err;
+		if (e2 > -dy)
+		{
+			err = err - dy;
+			x0 = x0 + sx;
+			if (x0 == x1 && y0 == y1)
+			{
+				if (callback && callback(x0, y0))
+					return false;
+				return true;
+			}
+		}
+		if (e2 < dx)
+		{
+			err = err + dx;
+			y0 = y0 + sy;
+		}
+	}
+}

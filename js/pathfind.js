@@ -31,7 +31,7 @@ function planPath(x0, y0, x1, y1)
 		var item = openList;
 		openList = openList.next;
 		if (item.x == x1 && item.y == y1)
-			return {x: item.base.x, y: item.base.y};
+			return {x: item.base.x, y: item.base.y, cost: item.cost};
 		
 		if (map.tiles[item.x-1][item.y].type != 16) addToList(item.x-1, item.y, item);
 		if (map.tiles[item.x+1][item.y].type != 16) addToList(item.x+1, item.y, item);

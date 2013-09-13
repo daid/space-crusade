@@ -90,6 +90,8 @@ function Unit(type, x, y)
 				}
 			}
 			if (map.tiles[x][y].type == 16) return false;
+			
+			//Check if we need to open a door.
 			if (map.tiles[x][y].type == 17)
 			{
 				map.tiles[x][y].type = 8;
@@ -97,6 +99,8 @@ function Unit(type, x, y)
 				if (map.tiles[x+1][y].type == 17) map.tiles[x+1][y].type = 8;
 				if (map.tiles[x][y-1].type == 17) map.tiles[x][y-1].type = 8;
 				if (map.tiles[x][y+1].type == 17) map.tiles[x][y+1].type = 8;
+				insertIntoActQueue(this, 5);
+				return;
 			}
 
 			map.tiles[this.x][this.y].unit = swap;
@@ -113,29 +117,41 @@ function Unit(type, x, y)
 			this.x = x;
 			this.y = y;
 
-			insertIntoActQueue(this, 1);
+			insertIntoActQueue(this, 10);
 			return true;
 		}
 		Unit.prototype.attack = function(x, y)
 		{
+			traceLine(this.x, this.y, x, y, function(hx, hy)
+			{
+				x = hx; y = hy;
+				if (hx == this.x && hy == this.y) return false;
+				if (map.tiles[hx][hy].type >= 16) return true;
+			});
 			var u = map.tiles[x][y].unit;
 			if (u && u != this)
 			{
-				u.takeDamage(1);
 				addMessage(this.type.name + " fires a shot at " + u.type.name);
+				u.takeDamage(1);
 			}else{
 				addMessage(this.type.name + " fires a shot into the air");
 			}
 			addShotVisual(this.x, this.y, x, y);
-			insertIntoActQueue(actQueue, 2);
+			insertIntoActQueue(this, 20);
+		}
+		Unit.prototype.doNothing = function()
+		{
+			insertIntoActQueue(this, this.isPlayer() ? 10 : 1);
 		}
 		Unit.prototype.takeDamage = function(amount)
 		{
 			this.hp -= amount;
 			if (this.hp <= 0)
 			{
+				addMessage(this.type.name + " has been killed");
 				this.hp = 0;
 				this.removeUnit();
+				map.tiles[this.x][this.y].blood = true;
 			}
 		}
 		Unit.prototype.removeUnit = function()
@@ -207,6 +223,6 @@ function updateActQueue()
 		}
 		
 		if (u == actQueue)//If no action was done, then do nothing for 1 time unit.
-			insertIntoActQueue(actQueue, 1);
+			u.doNothing();
 	}
 }

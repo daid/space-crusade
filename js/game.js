@@ -59,12 +59,15 @@ var gameStateNormal = {
 				castLight(player.x, player.y, 10, function(x, y) {
 					if (map.tiles[x][y].unit && map.tiles[x][y].unit.isEnemy())
 					{
-						gameState.target.x = x;
-						gameState.target.y = y;
+						if (traceLine(player.x, player.y, x, y, function(x, y) { return map.tiles[x][y].type >= 16; }))
+						{
+							gameState.target.x = x;
+							gameState.target.y = y;
+						}
 					}
 				});
 			}
-			if (keyCode == 190 || keyCode == 46) { prePlayerAction(); insertIntoActQueue(player, 1); }
+			if (keyCode == 190 || keyCode == 46) { prePlayerAction(); player.doNothing(); }
 		}
 		updateActQueue();
 		drawScreen();
@@ -79,6 +82,10 @@ var gameStateNormal = {
 		drawImage('sprites', 20*16 + 2 + 2, 32 + 2, (nr & 0x0F) * 17 + 2, (nr >> 4) * 20, 17, 18);
 		drawString(20*16 + 2 + 2, 32 + 2 + 20, u.type.name);
 		drawString(20*16 + 2 + 2, 32 + 2 + 27, 'Health: ' + u.hp);
+		if (u.isFriendly() && !u.isPlayer())
+		{
+			drawString(20*16 + 2 + 2, 32 + 2 + 41, 'Orders: Following');
+		}
 	},
 };
 var gameStateTarget = {
@@ -89,10 +96,14 @@ var gameStateTarget = {
 	{
 		if (keyCode == 70)
 		{
-			prePlayerAction();
-			player.attack(gameState.target.x, gameState.target.y);
-			gameState = gameStateNormal;
-			updateActQueue();
+			if (player.x == gameState.target.x && player.y == gameState.target.y)
+				gameState = gameStateNormal; addMessage('Canceled.');
+			}else{
+				prePlayerAction();
+				player.attack(gameState.target.x, gameState.target.y);
+				gameState = gameStateNormal;
+				updateActQueue();
+			}
 		}
 		if (keyCode == 37) { gameState.target.x -= 1; }
 		if (keyCode == 38) { gameState.target.y -= 1; }
@@ -103,7 +114,11 @@ var gameStateTarget = {
 	},
 	draw: function()
 	{
-		drawBox((gameState.target.x - map.viewX) * 16-1, (gameState.target.y - map.viewY) * 16+32-2,18,20, "rgba(255,255,0,0.5)");
+		var hitChance = 100;
+		if (!traceLine(player.x, player.y, gameState.target.x, gameState.target.y, function(x, y) { return map.tiles[x][y].type >= 16; }))
+			hitChance = 0;
+		
+		drawBox((gameState.target.x - map.viewX) * 16-1, (gameState.target.y - map.viewY) * 16+32-2,18,20, hitChance > 0 ? "rgba(255,255,0,0.5)" : "rgba(255,0,0,0.5)");
 
 		var u = map.tiles[gameState.target.x][gameState.target.y].unit;
 		if (u == null || map.tiles[gameState.target.x][gameState.target.y].vis < 2) return;
@@ -112,6 +127,8 @@ var gameStateTarget = {
 		drawImage('sprites', 20*16 + 2 + 2, 32 + 2, (nr & 0x0F) * 17 + 2, (nr >> 4) * 20, 17, 18);
 		drawString(20*16 + 2 + 2, 32 + 2 + 20, u.type.name);
 		drawString(20*16 + 2 + 2, 32 + 2 + 27, 'Health: ' + u.hp);
+
+		drawString(20*16 + 2 + 2, 32 + 2 + 41, 'Hit chance:'+hitChance);
 	},
 };
 var gameState = gameStateNormal;
@@ -130,13 +147,13 @@ function drawScreen()
 	drawMap();
 	
 	//Message box
-	drawBox(0, 1, 20*16, 30, "#ffffff");
+	drawBox(0, 1, 478, 30, "#ffffff");
 	if (messageList.length > 0) drawString(2, 24, messageList[0]);
 	if (messageList.length > 1) drawString(2, 17, messageList[1]);
 	if (messageList.length > 2) drawString(2, 10, messageList[2]);
 	if (messageList.length > 3) drawString(2, 3, messageList[3]);
 
-	drawBox(20*16 + 2, 32, 122, 100, "#ffffff");
+	drawBox(20*16 + 2, 32, 156, 100, "#ffffff");
 	gameState.draw();
 }
 function addMessage(message)
@@ -160,7 +177,7 @@ function drawWall(x, y, nr)
 }
 function drawSprite(x, y, nr)
 {
-	drawImage('sprites', x*16, 32+y*16-2, (nr & 0x0F) * 17 + 2, (nr >> 4) * 20, 17, 18);
+	drawImage('sprites', x*16, 32+y*16-2, (nr & 0x0F) * 17 + 2, (nr >> 4) * 20, 16, 18);
 }
 function drawHealth(x, y, value, max)
 {

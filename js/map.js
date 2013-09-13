@@ -27,9 +27,10 @@ function drawMap()
 	{
 		for(var y=0;y<20;y++)
 		{
-			drawTile(x, y, map.tiles[x+map.viewX][y+map.viewY].groundTile);
+			var t = map.tiles[x+map.viewX][y+map.viewY];
+			drawTile(x, y, t.groundTile);
 			
-			if (map.tiles[x+map.viewX][y+map.viewY].type == 8 && map.tiles[x+map.viewX][y+map.viewY-1].type == 8)
+			if (t.type == 8 && map.tiles[x+map.viewX][y+map.viewY-1].type == 8)
 			{
 				drawTile(x, y-1, 2);
 				drawTile(x, y, 2);
@@ -39,6 +40,8 @@ function drawMap()
 				drawTile(x-1, y, 1);
 				drawTile(x, y, 1);
 			}
+			if (t.blood)
+				drawSprite(x, y, 50);
 		}
 	}
 	//Draw walls and units.
